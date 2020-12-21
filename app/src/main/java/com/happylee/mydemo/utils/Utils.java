@@ -1,6 +1,8 @@
 package com.happylee.mydemo.utils;
 
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.util.Log;
 
 /**
  * <pre>
@@ -38,4 +40,19 @@ public class Utils {
         }
         throw new NullPointerException("u should init first");
     }
+
+    /**当用户第一次启动APP时对SP初始化，否则不初始化*/
+    public static void initSharedPreferences() {
+        SharedPreferences sharedPreferences = context.getSharedPreferences("app_sharedpreferences", Context.MODE_PRIVATE);
+        boolean isFirstRun = sharedPreferences.getBoolean("isFirstRun", true);
+        SharedPreferences.Editor sharedPreferencesEditor = sharedPreferences.edit();
+        if (isFirstRun) {
+            Log.d("TAG", "第一次运行该APP");
+            sharedPreferencesEditor.putBoolean("isFirstRun", false);
+            sharedPreferencesEditor.apply();
+        } else {
+            Log.e("TAG", "不是第一次运行该APP");
+        }
+    }
+
 }

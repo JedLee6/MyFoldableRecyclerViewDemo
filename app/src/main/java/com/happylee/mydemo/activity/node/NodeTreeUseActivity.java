@@ -1,34 +1,107 @@
-package com.happylee.mydemo;
+package com.happylee.mydemo.activity.node;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.chad.library.adapter.base.entity.node.BaseNode;
+import com.happylee.mydemo.R;
+import com.happylee.mydemo.adapter.node.tree.NodeTreeAdapter;
+import com.happylee.mydemo.base.BaseActivity;
+import com.happylee.mydemo.entity.node.tree.FirstNode;
+import com.happylee.mydemo.entity.node.tree.SecondNode;
+import com.happylee.mydemo.entity.node.tree.ThirdNode;
+import com.happylee.mydemo.utils.Tips;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 /**
- * @author Jed Lee(李俊德)
+ * @author Happy Lee(李俊德)
  */
-public class MainActivity extends AppCompatActivity {
+public class NodeTreeUseActivity extends BaseActivity {
+
+    private RecyclerView mRecyclerView;
+    private NodeTreeAdapter adapter = new NodeTreeAdapter();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_node_tree);
+
+
+        setBackBtn();
+        setTitle("Node Use (Tree)");
+
+        mRecyclerView = findViewById(R.id.rv_list);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        mRecyclerView.setAdapter(adapter);
+
+        adapter.setList(getEntity());
+
+        // 模拟新增node
+        /*
+        mRecyclerView.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                SecondNode seNode = new SecondNode(new ArrayList<BaseNode>(), "Second Node(This is added)");
+                SecondNode seNode2 = new SecondNode(new ArrayList<BaseNode>(), "Second Node(This is added)");
+                List<SecondNode> nodes = new ArrayList<>();
+                nodes.add(seNode);
+                nodes.add(seNode2);
+                //第一个夫node，位置为子node的3号位置
+                adapter.nodeAddData(adapter.getData().get(0), 2, nodes);
+//                adapter.nodeSetData(adapter.getData().get(0), 2, seNode2);
+//                adapter.nodeReplaceChildData(adapter.getData().get(0), nodes);
+                Tips.show("新插入了两个node", Toast.LENGTH_LONG);
+            }
+        }, 2000);
+        */
         //将SharedPreference数据写入SP
         configSharedPreferencesData();
         //从SP中读取全部数据
         traversalSharedPreferences();
+
+    }
+
+    private List<BaseNode> getEntity() {
+        List<BaseNode> list = new ArrayList<>();
+        for (int i = 0; i < 8; i++) {
+
+            List<BaseNode> secondNodeList = new ArrayList<>();
+            for (int n = 0; n <= 5; n++) {
+
+                List<BaseNode> thirdNodeList = new ArrayList<>();
+                for (int t = 0; t <= 3; t++) {
+                    ThirdNode node = new ThirdNode("Third Node " + t);
+                    thirdNodeList.add(node);
+                }
+
+                SecondNode seNode = new SecondNode(thirdNodeList, "Second Node " + n);
+                secondNodeList.add(seNode);
+            }
+
+            FirstNode entity = new FirstNode(secondNodeList, "First Node " + i);
+
+            // 模拟 默认第0个是展开的
+            entity.setExpanded(i == 0);
+
+            list.add(entity);
+        }
+        return list;
     }
 
     private void configSharedPreferencesData() {

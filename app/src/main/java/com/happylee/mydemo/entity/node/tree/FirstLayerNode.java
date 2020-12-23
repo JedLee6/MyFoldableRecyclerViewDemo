@@ -7,13 +7,16 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class FirstNode extends BaseExpandNode {
+public class FirstLayerNode extends BaseExpandNode {
 
     private List<BaseNode> childNode;
+    //该项在整个二级列表中的位置
+    private int itemPosition;
     private String title;
 
-    public FirstNode(List<BaseNode> childNode, String title) {
+    public FirstLayerNode(List<BaseNode> childNode, int itemPosition, String title) {
         this.childNode = childNode;
+        this.itemPosition = itemPosition;
         this.title = title;
 
         setExpanded(false);
@@ -23,10 +26,21 @@ public class FirstNode extends BaseExpandNode {
         return title;
     }
 
+    public void setTitle(String title) {
+        this.title = title;
+    }
 
     @Nullable
     @Override
     public List<BaseNode> getChildNode() {
         return childNode;
+    }
+
+    public int getItemPosition() {
+        return itemPosition;
+    }
+
+    public void setItemPosition(int itemPosition) {
+        this.itemPosition = itemPosition;
     }
 }

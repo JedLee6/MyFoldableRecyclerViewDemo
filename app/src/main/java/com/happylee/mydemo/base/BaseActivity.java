@@ -25,6 +25,7 @@ import com.happylee.mydemo.R;
 public abstract class BaseActivity extends AppCompatActivity {
     /**
      * 日志输出标志getSupportActionBar().
+     * BaseActivity中自定义了标题栏中的返回按钮和标题文本
      **/
     private TextView title;
     private ImageView back;
@@ -91,7 +92,7 @@ public abstract class BaseActivity extends AppCompatActivity {
 
         }
         back = findViewById(R.id.img_back);
-        title = findViewById(R.id.title);
+        title = findViewById(R.id.title_bar_title);
     }
 
 

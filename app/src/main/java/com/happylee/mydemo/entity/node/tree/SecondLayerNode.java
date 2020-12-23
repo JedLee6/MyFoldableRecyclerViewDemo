@@ -15,11 +15,11 @@ public class SecondLayerNode extends BaseNode{
     //该Node存储的SP键值对的key
     private String spKey;
     //该Node存储的SP键值对的Value
-    private String spValue;
+    private Object spValue;
 
     //private String title;
 
-    public SecondLayerNode(int itemPosition, String spName, String spKey, String spValue) {
+    public SecondLayerNode(int itemPosition, String spName, String spKey, Object spValue) {
         this.itemPosition = itemPosition;
         this.spName = spName;
         this.spKey = spKey;
@@ -40,7 +40,7 @@ public class SecondLayerNode extends BaseNode{
         return spKey;
     }
 
-    public String getSpValue() {
+    public Object getSpValue() {
         return spValue;
     }
 

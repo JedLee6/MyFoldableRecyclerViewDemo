@@ -13,6 +13,9 @@ import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
 
 import com.happylee.mydemo.activity.node.NodeTreeUseActivity;
+import com.happylee.mydemo.entity.node.tree.SecondLayerNode;
+
+import org.w3c.dom.Node;
 
 import java.io.File;
 import java.util.HashSet;
@@ -57,6 +60,52 @@ public class Utils {
         throw new NullPointerException("u should init first");
     }
 
+    /**
+     * 判断用户输入的特性StringSet是否符合转义语法
+     * 例如[],["a"],["a","b"],[ " a" , "b " , " c "]都是合法输入
+     */
+    public static boolean isIllegalStringSet(String string) {
+        //可匹配[]和["任意字符"]，如有不合法的["任意字符""任意字符"]，也能正确识别
+        String stringSetRegex1 = "\\[\\s*(\"[^\"]*\")?\\s*\\]";
+        //要匹配["任意字符" (,"任意字符")+ ]
+        String stringSetRegex2 = "\\[\\s*(\"[^\"]*\")(\\s*\\,\\s*\"[^\"]*\")+\\s*\\]";
+
+        if (string.matches(stringSetRegex1)) {
+            return true;
+        } else if (string.matches(stringSetRegex2)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**解析，例如用户输入的特性StringSet字符串为[ " a" , "b " , " c "]，则解析成Set<String>类型的[a, b, c]*/
+    public static Set<String> parseStringSet(String string) {
+        char[] charArray = string.toCharArray();
+        Set<String> stringSet = new HashSet<>();
+        StringBuffer tempStringBuffer = new StringBuffer("");
+        //是否是一对双引号的左边那个双引号
+        //boolean isBeginningQuotationMark = true;
+        for (int i = 0; i < charArray.length; i++) {
+            if (charArray[i] == '\"') {
+                //每次准备读入新的字符串时，清空StringBuffer中的内容
+                tempStringBuffer.setLength(0);
+                do {
+                    i++;
+                    //如果该字符不是结尾的双引号，则写入tempStringBuffer
+                    if (charArray[i] != '\"') {
+                        tempStringBuffer.append(charArray[i]);
+                    }
+                } while (charArray[i] != '\"');
+                //把一对双引号中完整的字符串写入stringSet
+                stringSet.add(tempStringBuffer.toString());
+                //通过i++跳过一对双引号的右边那个双引号
+                i++;
+            }
+        }
+        return stringSet;
+    }
+
     /**当用户第一次启动APP时对SP初始化，否则不初始化*/
     public static void initSharedPreferences() {
         SharedPreferences sharedPreferences = context.getSharedPreferences("app_sharedpreferences", MODE_PRIVATE);
@@ -65,10 +114,8 @@ public class Utils {
             Log.d("TAG", "第一次运行该APP");
             SharedPreferences.Editor sharedPreferencesEditor = sharedPreferences.edit();
             sharedPreferencesEditor.putBoolean("isFirstRun", false);
-            sharedPreferencesEditor.putInt("test", 111);
-            sharedPreferencesEditor.putFloat("test", 222);
-            sharedPreferencesEditor.putLong("test", 333);
-            sharedPreferencesEditor.apply();
+            //必须commit()提交，不然第一次运行APP可能导致SP没有及时加载完全
+            sharedPreferencesEditor.commit();
             configSharedPreferencesData();
         } else {
             Log.e("TAG", "不是第一次运行该APP");
@@ -99,8 +146,8 @@ public class Utils {
         sharedPreferencesEditor.putStringSet("alias",stringSet);
         sharedPreferencesEditor.putString("name", "Tom");
         sharedPreferencesEditor.putInt("age", 28);
-        sharedPreferencesEditor.apply();
-        //sharedPreferencesEditor.commit();
+        //必须commit()提交，不然第一次运行APP可能导致SP没有及时加载完全
+        sharedPreferencesEditor.commit();
     }
 
     public static String[] getFileNames(String filepath) {
@@ -116,7 +163,21 @@ public class Utils {
      */
     public static void showDialog(Context context, Handler handler, int messageWhat) {
         final EditText editText = new EditText(context);
-        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context).setTitle("输入修改后的内容").setView(editText)
+        //用于获得ENtity再获得sp_value的类型
+        NodeTreeUseActivity nodeTreeUseActivity = null;
+        SecondLayerNode secondLayerNode = null;
+        if (context instanceof NodeTreeUseActivity) {
+            nodeTreeUseActivity = (NodeTreeUseActivity) context;
+            Object clickedNodeEntity = nodeTreeUseActivity.getClickedNodeEntity();
+            if (clickedNodeEntity instanceof SecondLayerNode) {
+                secondLayerNode = (SecondLayerNode) clickedNodeEntity;
+            }
+        }
+        String alertText = "输入修改后的内容：";
+        if (messageWhat==NodeTreeUseActivity.UPDATE_SP_VALUE && secondLayerNode != null) {
+            alertText = "当前spValue类型为：" + secondLayerNode.getSpValue().getClass().getSimpleName() + "，" + alertText;
+        }
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context).setTitle(alertText).setView(editText)
                 .setPositiveButton("确认修改", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {

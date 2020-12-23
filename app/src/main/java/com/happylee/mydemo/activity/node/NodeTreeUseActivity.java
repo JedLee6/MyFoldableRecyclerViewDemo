@@ -52,10 +52,14 @@ public class NodeTreeUseActivity extends BaseActivity {
     /**用于存储所有sp文件的键值对*/
     private List<Map<String, String>> spMapList = new ArrayList<>();
     /**存储firstLayerNode的列表*/
-    private List<FirstLayerNode> firstLayerNodeList = new ArrayList<>();;
+    private List<FirstLayerNode> firstLayerNodeList = new ArrayList<>();
 
     private View clickedView;
     private Object clickedNodeEntity;
+
+    public Object getClickedNodeEntity() {
+        return clickedNodeEntity;
+    }
 
     /**实例化一个MyHandler对象*/
     private Handler handler = new MyHandler(this);
@@ -71,36 +75,175 @@ public class NodeTreeUseActivity extends BaseActivity {
         @Override
         public void handleMessage(Message msg) {
             NodeTreeUseActivity nodeTreeUseActivity = NodeTreeUseActivityWeakReference.get();
+            //提取3种修改情况下的TextView
+            TextView textViewToBeChanged = (TextView) nodeTreeUseActivity.clickedView;
+            //原来SP中的sp_name
+            String originalSPName;
+            //不带后缀".xml"的sp_name
+            String spNameWithoutSuffix;
+            //原来SP中的key
+            String originalSPKey;
+            //通过Object拿到原来SP中key对应的value，但是也必须知道value的类型
+            Object originalValue;
+            //通过Entity拿到sp的value，再读取原来value的类型
+            String originalValueType;
+            //分别拿到SP和SP.Editor的对象
+            SharedPreferences sharedPreferences;
+            SharedPreferences.Editor sharedPreferencesEditor;
+
             switch (msg.what) {
                 case UPDATE_SP_NAME:
                     //Object[] objArray = (Object[]) msg.obj;
                     int clickedFirstLayerPosition = ((FirstLayerNode) nodeTreeUseActivity.clickedNodeEntity).getItemPosition();
-                    TextView textViewToBeChanged= (TextView) nodeTreeUseActivity.clickedView;
-                    String originalFileName = textViewToBeChanged.getText().toString();
-                    String changedSPFileName = msg.obj.toString();
+                    originalSPName = textViewToBeChanged.getText().toString();
+                    String changedSPName = msg.obj.toString();
                     //在数据中更新SP文件名
-                    nodeTreeUseActivity.firstLayerNodeList.get(clickedFirstLayerPosition).setTitle(changedSPFileName+XML_FILE_SUFFIX);
+                    nodeTreeUseActivity.firstLayerNodeList.get(clickedFirstLayerPosition).setTitle(changedSPName+XML_FILE_SUFFIX);
                     //通知adapter刷新RecyclerView数据
                     nodeTreeUseActivity.adapter.notifyDataSetChanged();
                     //在SP中修改数据
-                    Utils.changeFileName(nodeTreeUseActivity.getApplicationInfo().dataDir + "/shared_prefs/" + originalFileName, changedSPFileName);
+                    Utils.changeFileName(nodeTreeUseActivity.getApplicationInfo().dataDir + "/shared_prefs/" + originalSPName, changedSPName);
                     break;
-                case UPDATE_SP_KEY:
-                    TextView textViewToBeChanged2= (TextView) nodeTreeUseActivity.clickedView;
-                    String originalSPKey = textViewToBeChanged2.getText().toString();
-                    String changedSPKey = msg.obj.toString();
-                    String spName = ((SecondLayerNode) nodeTreeUseActivity.clickedNodeEntity).getSpName();
-                    //拿到原来SP中key对应的value
-                    SharedPreferences sharedPreferences = nodeTreeUseActivity.getSharedPreferences(spName.substring(0, spName.length() - 4), MODE_PRIVATE);
-                    //String originalValue=sharedPreferences.getString()
-                    //删除原来的SP中key所在的键值对
 
-                    //在SP中更新key
-                    SharedPreferences.Editor editor = sharedPreferences.edit();
-                    //sharedPreferences.getAll()
+                case UPDATE_SP_KEY:
+                    //拿到原来SP中的sp_name
+                    originalSPName = ((SecondLayerNode) nodeTreeUseActivity.clickedNodeEntity).getSpName();
+                    //不带后缀".xml"的sp_name
+                    spNameWithoutSuffix = originalSPName.substring(0, originalSPName.length() - 4);
+                    //拿到原来SP中的key
+                    originalSPKey = textViewToBeChanged.getText().toString();
+                    //拿到需要修改后的SP中的key
+                    String changedSPKey = msg.obj.toString();
+
+                    //通过Object拿到原来SP中key对应的value，但是也必须知道value的类型
+                    originalValue = ((SecondLayerNode) nodeTreeUseActivity.clickedNodeEntity).getSpValue();
+                    //通过Entity拿到sp的value，再读取原来value的类型
+                    originalValueType = originalValue.getClass().getSimpleName();
+
+                    //分别拿到SP和SP.Editor的对象
+                    sharedPreferences = nodeTreeUseActivity.getSharedPreferences(spNameWithoutSuffix, MODE_PRIVATE);
+                    sharedPreferencesEditor = sharedPreferences.edit();
+                    //删除原来的SP中key所在的键值对
+                    sharedPreferencesEditor.remove(originalSPKey);
+
+                    //在SP中插入新的key-value，通过判断sp新key对应value的类型从而执行对应的SP.Editor写入语句
+                    switch (originalValueType) {
+                        case "Boolean":
+                            sharedPreferencesEditor.putBoolean(changedSPKey, (Boolean) originalValue);
+                            break;
+
+                        case "Integer":
+                            sharedPreferencesEditor.putInt(changedSPKey, (Integer) originalValue);
+                            break;
+
+                        case "Long":
+                            sharedPreferencesEditor.putLong(changedSPKey, (Long) originalValue);
+                            break;
+
+                        case "Float":
+                            sharedPreferencesEditor.putFloat(changedSPKey, (Float) originalValue);
+                            break;
+
+                        case "String":
+                            sharedPreferencesEditor.putString(changedSPKey, (String) originalValue);
+                            break;
+
+                        case "HashSet":
+                            sharedPreferencesEditor.putStringSet(changedSPKey, (Set<String>) originalValue);
+                            break;
+
+                        default:
+                            break;
+                    }
+                    sharedPreferencesEditor.commit();
+                    break;
+
+                case UPDATE_SP_VALUE:
+                    //拿到原来SP中的sp_name
+                    originalSPName = ((SecondLayerNode) nodeTreeUseActivity.clickedNodeEntity).getSpName();
+                    //不带后缀".xml"的sp_name
+                    spNameWithoutSuffix = originalSPName.substring(0, originalSPName.length() - 4);
+                    //拿到原来SP中的key
+                    originalSPKey = ((SecondLayerNode) nodeTreeUseActivity.clickedNodeEntity).getSpKey();
+                    //拿到需要修改后的SP中的value
+                    String changedSPValue = msg.obj.toString();
+                    //通过Object拿到原来SP中key对应的value，但是也必须知道value的类型
+                    originalValue = ((SecondLayerNode) nodeTreeUseActivity.clickedNodeEntity).getSpValue();
+                    //通过Entity拿到sp的value，再读取原来value的类型
+                    originalValueType = originalValue.getClass().getSimpleName();
+
+
+                    //分别拿到SP和SP.Editor的对象
+                    sharedPreferences = nodeTreeUseActivity.getSharedPreferences(spNameWithoutSuffix, MODE_PRIVATE);
+                    sharedPreferencesEditor = sharedPreferences.edit();
+
+                    //根据spValue的6中类型，对用户输入的changedSPValue进行不同的处理
+                    switch (originalValueType) {
+                        case "Boolean":
+                            if ("true".equals(changedSPValue)) {
+                                sharedPreferencesEditor.putBoolean(originalSPKey, true);
+                            } else if ("false".equals(changedSPValue)) {
+                                sharedPreferencesEditor.putBoolean(originalSPKey, false);
+                            } else {
+                                Toast.makeText(nodeTreeUseActivity, "输入不合法，请输入true或者false", Toast.LENGTH_SHORT).show();
+                            }
+                            break;
+
+                        case "Integer":
+                            try {
+                                sharedPreferencesEditor.putInt(originalSPKey, Integer.parseInt(changedSPValue));
+                            } catch (NumberFormatException e) {
+                                Toast.makeText(nodeTreeUseActivity, "输入不合法，请输入合法的Integer型整数", Toast.LENGTH_SHORT).show();
+                            }
+                            break;
+
+                        case "Long":
+                            try {
+                                sharedPreferencesEditor.putLong(originalSPKey, Long.parseLong(changedSPValue));
+                            } catch (NumberFormatException e) {
+                                Toast.makeText(nodeTreeUseActivity, "输入不合法，请输入合法的Long型整数", Toast.LENGTH_SHORT).show();
+                            }
+                            break;
+
+                        case "Float":
+                            try {
+                                sharedPreferencesEditor.putFloat(originalSPKey, Float.parseFloat(changedSPValue));
+                            } catch (NumberFormatException e) {
+                                Toast.makeText(nodeTreeUseActivity, "输入不合法，请输入合法的Float型浮点数", Toast.LENGTH_SHORT).show();
+                            }
+                            break;
+
+                        case "String":
+                            sharedPreferencesEditor.putString(originalSPKey, changedSPValue);
+                            break;
+
+                        case "HashSet":
+                            if (Utils.isIllegalStringSet(changedSPValue)) {
+                                //如果用户输入的是合法的特性StringSet，则解析成Set<String>
+                                Set<String> parsedStringSet = Utils.parseStringSet(changedSPValue);
+                                sharedPreferencesEditor.putStringSet(originalSPKey, parsedStringSet);
+                            } else {
+                                Toast.makeText(nodeTreeUseActivity, "输入不合法，请输入合法的Set<String>型数据，例如[\"a\",\"b\",\"c\"]", Toast.LENGTH_SHORT).show();
+                            }
+                            break;
+
+                        default:
+                            break;
+                    }
+                    sharedPreferencesEditor.commit();
+                    break;
+
                 default:
                     break;
             }
+
+            //更新数据源
+            nodeTreeUseActivity.traversalSharedPreferences();
+            //按道理可以不写这行代码，因为firstLayerNodeList明明持有的原对象的引用
+            nodeTreeUseActivity.adapter.setList(nodeTreeUseActivity.firstLayerNodeList);
+            //通知Adapter更新数据
+            nodeTreeUseActivity.adapter.notifyDataSetChanged();
+
         }
     }
 
@@ -134,13 +277,16 @@ public class NodeTreeUseActivity extends BaseActivity {
                 //用户点击的View的实例，例如TextView
                 clickedView = view;
                 if (view.getId() == R.id.sp_name) {
-                    updateType = 1;
+                    updateType = UPDATE_SP_NAME;
                     Toast.makeText(NodeTreeUseActivity.this, "你点击了sp_name，其一级列表中的position为"+((FirstLayerNode)clickedNodeEntity).getItemPosition(), Toast.LENGTH_SHORT).show();
                 } else if (view.getId() == R.id.sp_key_text_view) {
-                    updateType = 2;
+                    updateType = UPDATE_SP_KEY;
                     Toast.makeText(NodeTreeUseActivity.this, "你点击了sp_key，其二级列表中的position为" + ((SecondLayerNode) clickedNodeEntity).getItemPosition(), Toast.LENGTH_SHORT).show();
+                    Object object = ((SecondLayerNode) clickedNodeEntity).getSpValue();
+                    //Toast.makeText(NodeTreeUseActivity.this, "你点击了sp_key，其value类型为" + object.getClass()+" 它是否instanceof Set<?>:"+(object instanceof Set<?>), Toast.LENGTH_SHORT).show();
+
                 } else if (view.getId() == R.id.sp_value_text_view) {
-                    updateType = 3;
+                    updateType = UPDATE_SP_VALUE;
                     Toast.makeText(NodeTreeUseActivity.this, "你点击了sp_value,其二级列表中的position为" + ((SecondLayerNode) clickedNodeEntity).getItemPosition(), Toast.LENGTH_SHORT).show();
                 }
                 //调用Dialog，用于获取用户想修改的数值
@@ -154,7 +300,7 @@ public class NodeTreeUseActivity extends BaseActivity {
     /**把SP文件名和SP的键值对全部存储到firstLayerNodeList和secondLayerNodeList中*/
     private void traversalSharedPreferences(){
         //初始化
-        firstLayerNodeList = new ArrayList<>();
+        firstLayerNodeList.clear();
         //spFileNamesArray存储的是shared_prefs文件夹下所有的xml文件的文件名
         String[] spFileNamesArray = Utils.getFileNames(getApplicationInfo().dataDir + "/shared_prefs");
         //该sp文件的在一级列表中的排序位置
@@ -176,7 +322,8 @@ public class NodeTreeUseActivity extends BaseActivity {
             for (Map.Entry<String, ?> mapEntry:
                 sharedPreferences.getAll().entrySet()){
                 String spKey = mapEntry.getKey();
-                String spValue = mapEntry.getValue().toString();
+                //用Object继续保存spValue的原有数据类型
+                Object spValue = mapEntry.getValue();
                 SecondLayerNode secondLayerNode = new SecondLayerNode(spMapPosition,spFileName, spKey, spValue);
                 secondLayerNodeList.add(secondLayerNode);
                 spMapPosition++;

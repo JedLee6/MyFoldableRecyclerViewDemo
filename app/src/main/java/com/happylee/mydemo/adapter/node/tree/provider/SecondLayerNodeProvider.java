@@ -24,6 +24,7 @@ public class SecondLayerNodeProvider extends BaseNodeProvider {
     public void convert(@NotNull BaseViewHolder helper, @NotNull BaseNode data) {
         SecondLayerNode entity = (SecondLayerNode) data;
         helper.setText(R.id.sp_key_text_view, entity.getSpKey());
-        helper.setText(R.id.sp_value_text_view, entity.getSpValue());
+        //在实际输出过程中要注意将Object转化为String类型
+        helper.setText(R.id.sp_value_text_view, entity.getSpValue().toString());
     }
 }

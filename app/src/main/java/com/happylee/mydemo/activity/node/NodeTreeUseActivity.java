@@ -1,18 +1,16 @@
 package com.happylee.mydemo.activity.node;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
-import android.util.Log;
 import android.view.View;
-import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -20,23 +18,21 @@ import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.chad.library.adapter.base.entity.node.BaseNode;
 import com.chad.library.adapter.base.listener.OnItemChildClickListener;
 import com.happylee.mydemo.R;
+import com.happylee.mydemo.activity.DownloadFileActivity;
+import com.happylee.mydemo.activity.WebViewActivity;
 import com.happylee.mydemo.adapter.node.tree.NodeTreeAdapter;
 import com.happylee.mydemo.base.BaseActivity;
 import com.happylee.mydemo.entity.node.tree.FirstLayerNode;
 import com.happylee.mydemo.entity.node.tree.SecondLayerNode;
 import com.happylee.mydemo.utils.Utils;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import test.MyConstants;
 
 /**
  * @author Happy Lee(李俊德)
@@ -69,6 +65,8 @@ public class NodeTreeUseActivity extends BaseActivity {
         WeakReference<NodeTreeUseActivity> NodeTreeUseActivityWeakReference;
 
         MyHandler(NodeTreeUseActivity nodeTreeUseActivity) {
+            //Handler的无参构造方法已经被废弃了，必须调用有参方法传入参数Looper
+            super(Looper.getMainLooper());
             NodeTreeUseActivityWeakReference = new WeakReference<>(nodeTreeUseActivity);
         }
 
@@ -248,12 +246,19 @@ public class NodeTreeUseActivity extends BaseActivity {
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        setTitle("Update TextView in UI2");
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_node_tree);
 
         setBackBtn();
-        setTitle("Node Use (Tree)");
+        //根据打包不同，但是设置的代码相同，因为更新UI是在super.onResume之前，所以更新UI没有问题
+        setTitle(MyConstants.DOMAIN);
 
         mRecyclerView = findViewById(R.id.rv_list);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -269,6 +274,11 @@ public class NodeTreeUseActivity extends BaseActivity {
         adapter.setOnItemChildClickListener(new OnItemChildClickListener() {
             @Override
             public void onItemChildClick(@NonNull BaseQuickAdapter adapter, @NonNull View view, int position) {
+                //进入下载文件Activity
+                startActivity(new Intent(NodeTreeUseActivity.this, DownloadFileActivity.class));
+                //进入WebViewActivity
+                //startActivity(new Intent(NodeTreeUseActivity.this, WebViewActivity.class));
+
                 //要更新的数据类型，可以是sp_name、sp_key、sp_value
                 int updateType = 0;
                 //用户点击的Item的实例，例如FirstLayerNode或者SecondLayerNode
@@ -290,7 +300,7 @@ public class NodeTreeUseActivity extends BaseActivity {
                     Toast.makeText(NodeTreeUseActivity.this, "你点击了sp_value,其二级列表中的position为" + ((SecondLayerNode) clickedNodeEntity).getItemPosition(), Toast.LENGTH_SHORT).show();
                 }
                 //调用Dialog，用于获取用户想修改的数值
-                Utils.showDialog(NodeTreeUseActivity.this, handler, updateType);
+                //Utils.showDialog(NodeTreeUseActivity.this, handler, updateType);
                 //Toast.makeText(NodeTreeUseActivity.this, "你点击了这个child,position为" + position, Toast.LENGTH_SHORT).show();
 
             }

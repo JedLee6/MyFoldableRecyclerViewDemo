@@ -16,11 +16,43 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    flavorDimensions "location"
+    productFlavors {
+        china{
+            applicationIdSuffix ".cn"
+            dimension "location"
+        }
+
+        usa{
+            applicationIdSuffix ".usa"
+            dimension "location"
+        }
+
+    }
+
+    signingConfigs {
+        release {
+            keyAlias "mydemo"
+            keyPassword "lijunde"
+            storeFile file("mydemo.jks")
+            storePassword "lijunde"
+        }
+    }
+
     buildTypes {
         release {
+            //系统是否启用R8代码缩减功能，即控制项目是否进行混淆
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            //配置release版本的签名
+            signingConfig signingConfigs.release
         }
+
+        debug {
+            applicationIdSuffix ".debug"
+            debuggable true
+        }
+
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -29,6 +61,8 @@ android {
 }
 
 dependencies {
+    //添加OkHttp的依赖
+    implementation 'com.squareup.okhttp3:okhttp:4.9.0'
     //添加BaseRecyclerViewAdapterHelper依赖项，用于实现可折叠的RecyclerView
     implementation 'com.github.CymChad:BaseRecyclerViewAdapterHelper:3.0.4'
 

@@ -14,6 +14,7 @@ import androidx.lifecycle.ProcessLifecycleOwner;
 import com.happylee.mydemo.utils.Utils;
 
 /**
+ * 修改master分支
  */
 public class MyApplication extends Application {
     private String string;

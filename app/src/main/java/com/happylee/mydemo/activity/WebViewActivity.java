@@ -53,7 +53,7 @@ public class WebViewActivity extends AppCompatActivity {
         webView = findViewById(R.id.web_view);
         //配置Javascript接口
         webView.addJavascriptInterface(new JSInterface (),"Android");
-
+        //配置WebView为允许使用JavaScript
         webView.getSettings().setJavaScriptEnabled(true);
         webView.getSettings().setSupportZoom(true);
 
@@ -80,7 +80,7 @@ public class WebViewActivity extends AppCompatActivity {
 
             @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
             @Override
-            //当WebView加载新URL时，会回调shouldOverrideUrlLoading()方法
+            //当WebView加载新URL时会回调此方法，可在这拦截WebView加载
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 Toast.makeText(WebViewActivity.this, "这是在URL加载器拦截URL，并阻止它加载", Toast.LENGTH_SHORT).show();
 
@@ -99,6 +99,7 @@ public class WebViewActivity extends AppCompatActivity {
 
             @Nullable
             @Override
+            //响应实体时回调此方法，可在这拦截WebView加载
             public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
                 /*
                 String htmlPage = "<html>\n" +
@@ -139,7 +140,6 @@ public class WebViewActivity extends AppCompatActivity {
                 webResourceResponse = new WebResourceResponse("text/html", "utf-8", new ByteArrayInputStream(stringBuilder.toString().getBytes()));
                 return null;
                 //return webResourceResponse;
-
                 //return super.shouldInterceptRequest(view, request);
             }
 
@@ -157,7 +157,6 @@ public class WebViewActivity extends AppCompatActivity {
         //从Android 9.0（API级别28）开始，默认情况下禁用明文支持。
         //因此http的url均无法在WebView中加载
         //webView.loadUrl("https://www.baidu.com");
-
         webView.loadUrl("file:///android_asset/login_html/index.html");
 
         toastAtWebViewButton = findViewById(R.id.web_view_button);

@@ -61,11 +61,14 @@ android {
 }
 
 dependencies {
+    def lifecycle_version = "2.2.0"
+    // 可选 - ProcessLifecycleOwner给整个 app进程 提供一个lifecycle
+    implementation "androidx.lifecycle:lifecycle-process:$lifecycle_version"
     //添加OkHttp的依赖
     implementation 'com.squareup.okhttp3:okhttp:4.9.0'
     //添加BaseRecyclerViewAdapterHelper依赖项，用于实现可折叠的RecyclerView
     implementation 'com.github.CymChad:BaseRecyclerViewAdapterHelper:3.0.4'
-
+    //项目已经依赖了AndroidX，可直接使用Lifecycle库
     implementation 'androidx.appcompat:appcompat:1.2.0'
     implementation 'com.google.android.material:material:1.2.1'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.4'

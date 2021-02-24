@@ -23,12 +23,14 @@ public class ThreadPoolSingleton {
     private volatile static ThreadPoolSingleton instance;
     /**在私有构造方法中对ExecutorService进行初始化*/
     private ThreadPoolSingleton() {
+
         if (executorService == null) {
             executorService = new ThreadPoolExecutor(corePoolSize, maximumPoolSize,
                     keepAliveTime, TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(blockingQueueSize), new ThreadFactory() {
                 @Override
                 public Thread newThread(Runnable r) {
-                    return null;
+                    //阿里巴巴提示：要使用带有ThreadFactory参数的ThreadPoolExecutor构造方法哦，这样你就可以方便的设置线程名字啦，创建线程或线程池时请指定有意义的线程名称，方便出错时回溯。
+                    return new Thread(r, "thread_name");
                 }
             }, new RejectedExecutionHandler() {
                 @Override

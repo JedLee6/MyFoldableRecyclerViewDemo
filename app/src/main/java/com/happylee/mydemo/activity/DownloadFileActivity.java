@@ -4,12 +4,16 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.LifecycleObserver;
+import androidx.lifecycle.OnLifecycleEvent;
 
 import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -282,6 +286,8 @@ public class DownloadFileActivity extends AppCompatActivity {
                     //downloadTask = new DownloadTask(downloadListener);
                     //下载url通过DownloadTask的execute()方法传入
                     //downloadTask.execute(DOWNLOAD_URL, downloadDirectory);
+                    //如果想并行使用AsyncTask的话，执行下面的代码
+                    //downloadTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, DOWNLOAD_URL, downloadDirectory);
                     downloadTask.downloadFileByThread(DOWNLOAD_URL, downloadDirectory);
                     Toast.makeText(DownloadFileActivity.this, "Downloading...", Toast.LENGTH_SHORT).show();
                 }
@@ -323,6 +329,14 @@ public class DownloadFileActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_download_file);
 
+        getLifecycle().addObserver(new LifecycleObserver() {
+            @OnLifecycleEvent(value = Lifecycle.Event.ON_RESUME)
+            public void testMethod(){
+                Toast.makeText(context, "lifecycle onResume", Toast.LENGTH_SHORT).show();
+                Log.d("TAG", "；lifecycle onResume log");
+            }
+        });
+
         context = this;
         downloadStatusTextView = findViewById(R.id.download_status_text_view);
         downloadProgressTextView = findViewById(R.id.download_progress_text_view);
@@ -357,11 +371,13 @@ public class DownloadFileActivity extends AppCompatActivity {
 
                 try {
                     OkHttpClient okHttpClient = new OkHttpClient();
+                    //请求体，与get的区别在这里
                     RequestBody requestBody = new FormBody.Builder()
                             .add("username", "admin")
                             .add("password", "123456")
                             .build();
                     Request request = new Request.Builder().url("https://www.baidu.com")
+                            //传递请求体，与get的区别在这里
                             .post(requestBody)
                             .build();
                     Response response = okHttpClient.newCall(request).execute();

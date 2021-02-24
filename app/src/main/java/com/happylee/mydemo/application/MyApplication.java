@@ -14,8 +14,6 @@ import androidx.lifecycle.ProcessLifecycleOwner;
 import com.happylee.mydemo.utils.Utils;
 
 /**
-//<<<<<<< HEAD
- * @author Jed Lee(李俊德)，修改master分支的注解
  */
 public class MyApplication extends Application {
     private String string;

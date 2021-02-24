@@ -20,6 +20,8 @@ import com.happylee.mydemo.utils.Utils;
 public class MyApplication extends Application {
     private String string;
     private int num;
+    //给dev分支添加一个新的变量
+    private Object object;
     private static MyApplication myApplication;
 
     public static MyApplication getInstance() {

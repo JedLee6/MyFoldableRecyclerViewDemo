@@ -14,6 +14,7 @@ import androidx.lifecycle.ProcessLifecycleOwner;
 import com.happylee.mydemo.utils.Utils;
 
 /**
+ * 在master修改的此处，修改dev分支的内容
  */
 public class MyApplication extends Application {
     private String string;

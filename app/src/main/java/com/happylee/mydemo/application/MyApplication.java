@@ -14,7 +14,7 @@ import androidx.lifecycle.ProcessLifecycleOwner;
 import com.happylee.mydemo.utils.Utils;
 
 /**
- * @author Jed Lee(李俊德)
+ * @author Jed Lee(李俊德)，修改master分支的注解
  */
 public class MyApplication extends Application {
     private static MyApplication myApplication;

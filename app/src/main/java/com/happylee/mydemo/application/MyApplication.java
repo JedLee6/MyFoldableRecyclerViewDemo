@@ -16,6 +16,7 @@ import com.happylee.mydemo.utils.Utils;
 /**
  */
 public class MyApplication extends Application {
+    private String string;
     private int num;
     private static MyApplication myApplication;
 

@@ -14,7 +14,6 @@ import androidx.lifecycle.ProcessLifecycleOwner;
 import com.happylee.mydemo.utils.Utils;
 
 /**
- * @author Jed Lee(李俊德)，
  */
 public class MyApplication extends Application {
     private int num;

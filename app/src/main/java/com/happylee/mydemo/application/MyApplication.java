@@ -23,7 +23,7 @@ import com.happylee.mydemo.utils.Utils;
  * 在master修改的此处，修改dev分支的内容
 >>>>>>> 65c9e63 (在master修改的此处，修改dev分支的内容)
 =======
->>>>>>> 45ed6db (在新的一行增加dev分支内容)
+>>>>>>> 45ed6db (在新的一行增加dev分支内容),冲突
  */
 public class MyApplication extends Application {
     private String string;

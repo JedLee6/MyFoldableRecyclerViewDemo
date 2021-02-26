@@ -32,6 +32,7 @@ import com.happylee.mydemo.utils.Utils;
  * 再给dev分支增加注释，验证时间线问题
 >>>>>>> 2287585 (增加dev分支注释，验证时间线问题)
 >>>>>>> c78ac51861564b0e03ebc54d4a135c88098b91f0
+ 现在是在jed/dev分支
  */
 public class MyApplication extends Application {
     private String string;
